@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mini Games Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#141e30;--surface:rgba(255,255,255,.12);--surface-strong:rgba(255,255,255,.18);--text:#f8f5ef;--muted:#c8c3bd;--accent:#82d8d8;--accent-strong:#f7c948;--shadow:0 30px 80px rgba(0,0,0,.25)}
+*{box-sizing:border-box}
+html{height:100%}
+body{margin:0;min-height:100vh;height:100%;font-family:Poppins,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--text);background:radial-gradient(circle at top left,rgba(130,216,216,.25),transparent 28%),radial-gradient(circle at bottom right,rgba(247,201,72,.15),transparent 25%),linear-gradient(160deg,#0d1421 0%,#1a2a44 100%);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-bottom:30px}
+header{padding:40px 24px 24px;text-align:center;position:relative;overflow:hidden;width:100%;max-width:1400px}
+header::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 20% 30%,rgba(255,255,255,.15),transparent 20%),radial-gradient(circle at 80% 20%,rgba(130,216,216,.1),transparent 18%);pointer-events:none}
+header h1{position:relative;font-size:2.6rem;letter-spacing:.1em;margin:0;text-transform:uppercase;mix-blend-mode:screen}
+.container{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:24px;padding:24px;max-width:1400px;margin:0 auto;width:100%;min-height:calc(100vh - 180px);align-items:center;justify-items:center}
+.card{width:100%;background:var(--surface);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(18px);box-shadow:var(--shadow);padding:32px 24px;border-radius:28px;text-align:center;cursor:pointer;transition:transform .35s ease,box-shadow .35s ease,border-color .35s ease}
+.card:hover{transform:translateY(-6px);border-color:rgba(130,216,216,.45);box-shadow:0 40px 80px rgba(0,0,0,.28)}
+.card span{display:block;margin-top:12px;color:var(--muted);font-size:0.95rem}
+.game{display:none;padding:24px;max-width:1200px;min-height:calc(100vh - 180px);margin:0 auto;position:relative;opacity:0;transform:translateY(20px);transition:opacity .4s ease,transform .4s ease;display:flex;flex-direction:column;justify-content:center}
+.game.active{display:flex;opacity:1;transform:translateY(0)}
+.panel{background:var(--surface);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(18px);box-shadow:var(--shadow);border-radius:28px;padding:32px;position:relative;display:flex;flex-direction:column;justify-content:space-between;min-height:calc(100vh - 240px)}
+.panel h2{margin-top:0;font-size:2.2rem;letter-spacing:.02em}
+.panel p{color:var(--muted);line-height:1.8;margin:0 0 18px}
+button{padding:14px 20px;border:none;border-radius:16px;background:linear-gradient(135deg,var(--accent-strong),var(--accent));color:#112;cursor:pointer;font-weight:700;transition:transform .2s ease,filter .2s ease,background .2s ease;box-shadow:0 18px 40px rgba(0,0,0,.18);min-width:140px}
+button:hover{transform:translateY(-2px);filter:brightness(1.05)}
+button.secondary{background:rgba(255,255,255,.14);color:var(--text);box-shadow:none}
+.option-grid{display:grid;grid-template-columns:repeat(5,minmax(54px,1fr));gap:12px;margin:20px 0;align-items:center}
+.guess-option{padding:18px 0;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:16px;color:var(--text);font-size:1rem;cursor:pointer;transition:transform .2s ease,background .2s ease,border-color .2s ease;min-height:56px}
+.guess-option:hover{transform:translateY(-3px);background:rgba(130,216,216,.16);border-color:rgba(130,216,216,.35)}
+.guess-option.selected{background:rgba(130,216,216,.3);border-color:rgba(130,216,216,.55)}
+.guess-option.disabled{opacity:.35;pointer-events:none}
+.result{margin:24px 0;font-size:1.2rem;font-weight:700;min-height:1.2rem}
+.scoreboard{display:flex;flex-wrap:wrap;justify-content:center;gap:14px;margin:22px 0;color:var(--muted);font-size:.95rem}
+.scoreboard span{background:rgba(255,255,255,.08);padding:10px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.1);}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;justify-content:center;align-items:center;width:100%;max-width:320px;margin:0 auto}
+.cell{width:100%;aspect-ratio:1;max-width:100px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.1);border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:2rem;cursor:pointer;transition:transform .2s ease,background .25s ease,color .25s ease}
+.cell:hover{transform:translateY(-3px);background:rgba(255,255,255,.18)}
+.cell.disabled{cursor:default;opacity:.7}
+.mem{width:100%;aspect-ratio:1;max-width:80px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.1);border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;cursor:pointer;transition:transform .2s ease,background .25s ease,color .25s ease}
+.mem:hover{transform:translateY(-3px);background:rgba(255,255,255,.18)}
+.mem.matched{background:rgba(130,216,216,.2);border-color:rgba(130,216,216,.35);color:#112;cursor:default}
+.card{animation:float 6s ease-in-out infinite alternate}
+</style>
+</head>
+<body>
+<header><h1>Mini Games Hub</h1></header>
+
+<div class="container" id="menu">
+ <div class="card" onclick="openGame('guess')">Guess Number</div>
+ <div class="card" onclick="openGame('ttt')">Tic Tac Toe</div>
+ <div class="card" onclick="openGame('rps')">Rock Paper Scissors</div>
+ <div class="card" onclick="openGame('memory')">Memory Game</div>
+</div>
+
+<!-- Guess -->
+<div class="game" id="guess">
+ <div class="panel">
+  <h2>Guess the Number</h2>
+  <p>Pick one of the options below and see if you can find the secret number.</p>
+  <div id="guessOptions" class="option-grid"></div>
+  <div id="guessResult" class="result"></div>
+  <button onclick="resetGuess()">Reset Game</button>
+  <button class="secondary" onclick="back()">Back</button>
+ </div>
+</div>
+
+<!-- Tic Tac Toe -->
+<div class="game" id="ttt">
+ <div class="panel">
+  <h2>Tic Tac Toe</h2>
+  <p>Try to beat the AI before it learns your strategy. It gets stronger each round.</p>
+  <div class="scoreboard"><span id="tttLevel">AI Level: 1</span><span id="tttStatus">Your Turn</span></div>
+  <div id="board" class="grid"></div>
+  <div id="tttResult" class="result"></div>
+  <button onclick="startTTT()">Restart</button>
+  <button class="secondary" onclick="back()">Back</button>
+ </div>
+</div>
+
+<!-- RPS -->
+<div class="game" id="rps">
+ <div class="panel">
+  <h2>Rock Paper Scissors</h2>
+  <p>The CPU adapts to your choices and keeps the tension high.</p>
+  <div class="option-grid" style="grid-template-columns:repeat(3,1fr)">
+   <button onclick="playRPS('rock')">Rock</button>
+   <button onclick="playRPS('paper')">Paper</button>
+   <button onclick="playRPS('scissors')">Scissors</button>
+  </div>
+  <div class="scoreboard"><span>You: <strong id="rpsPlayerScore">0</strong></span><span>CPU: <strong id="rpsCpuScore">0</strong></span><span>Ties: <strong id="rpsTies">0</strong></span></div>
+  <p id="rpsResult" class="result"></p>
+  <button onclick="resetRPS()">Reset Score</button>
+  <button class="secondary" onclick="back()">Back</button>
+ </div>
+</div>
+
+<!-- Memory -->
+<div class="game" id="memory">
+ <div class="panel">
+  <h2>Memory Game</h2>
+  <p>Flip cards to match all pairs. The deck gets a little tougher every reset.</p>
+  <div id="memBoard" class="option-grid" style="grid-template-columns:repeat(4,minmax(70px,1fr));gap:12px"></div>
+  <div class="scoreboard"><span>Matches: <strong id="memMatches">0</strong></span><span>Attempts: <strong id="memAttempts">0</strong></span></div>
+  <div id="memResult" class="result"></div>
+  <button onclick="resetMemory()">Shuffle Again</button>
+  <button class="secondary" onclick="back()">Back</button>
+ </div>
+</div>
+
+<script>
+function openGame(id){
+ document.getElementById('menu').style.display='none';
+ document.querySelectorAll('.game').forEach(g=>{ g.classList.remove('active'); g.style.display='none'; });
+ const game = document.getElementById(id);
+ game.style.display = 'block';
+ requestAnimationFrame(() => game.classList.add('active'));
+}
+function back(){
+ document.querySelectorAll('.game').forEach(g=>g.classList.remove('active'));
+ setTimeout(() => {
+  document.querySelectorAll('.game').forEach(g=>g.style.display='none');
+  document.getElementById('menu').style.display='grid';
+ }, 220);
+}
+
+// Guess
+let secret = Math.floor(Math.random() * 10) + 1;
+const guessResult = document.getElementById('guessResult');
+function buildGuessOptions(){
+ const container = document.getElementById('guessOptions');
+ container.innerHTML = '';
+ for(let i = 1; i <= 10; i++){
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'guess-option';
+  button.innerText = i;
+  button.onclick = () => checkGuess(i, button);
+  container.appendChild(button);
+ }
+ guessResult.innerText = '';
+}
+function setGuessResult(text, state){
+ guessResult.innerText = text;
+ guessResult.style.color = state === 'success' ? '#8ce89f' : state === 'hint' ? '#f7c948' : '#f5f3ee';
+}
+function checkGuess(value, button){
+ if(value === secret){
+  setGuessResult(`Correct! The number was ${secret}. Nice work!`, 'success');
+  Array.from(document.querySelectorAll('.guess-option')).forEach(btn => btn.classList.add('disabled'));
+  button.classList.add('selected');
+ } else {
+  button.classList.add('disabled');
+  const hint = value < secret ? 'Higher' : 'Lower';
+  setGuessResult(`${hint} — try again!`, 'hint');
+ }
+}
+function resetGuess(){
+ secret = Math.floor(Math.random() * 10) + 1;
+ buildGuessOptions();
+}
+buildGuessOptions();
+
+// Tic Tac Toe
+const board = document.getElementById('board');
+const tttResult = document.getElementById('tttResult');
+const tttLevel = document.getElementById('tttLevel');
+const tttStatus = document.getElementById('tttStatus');
+let cells = Array(9).fill('');
+let active = true;
+let aiSkill = 0.7; // starts strong
+let aiProgress = 1;
+const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+function startTTT(){
+ cells = Array(9).fill('');
+ active = true;
+ tttResult.innerText = '';
+ tttStatus.innerText = 'Your Turn';
+ tttLevel.innerText = `AI Level: ${aiProgress}`;
+ draw();
+}
+function draw(){
+ board.innerHTML = '';
+ cells.forEach((c,i) => {
+  const d = document.createElement('div');
+  d.className = 'cell' + (c || !active ? ' disabled' : '');
+  d.innerText = c;
+  d.onclick = () => move(i);
+  board.appendChild(d);
+ });
+}
+function move(i){
+ if(!active || cells[i]) return;
+ cells[i] = 'X';
+ const result = checkWinner(cells);
+ if(result) return finishGame(result);
+ tttStatus.innerText = 'AI is choosing...';
+ draw();
+ setTimeout(() => {
+  aiMove();
+ }, 280);
+}
+function aiMove(){
+ const moveIndex = chooseAIMove();
+ if(moveIndex === null) return finishGame('draw');
+ cells[moveIndex] = 'O';
+ const result = checkWinner(cells);
+ draw();
+ if(result) return finishGame(result);
+ tttStatus.innerText = 'Your Turn';
+}
+function checkWinner(boardState){
+ for(const [a,b,c] of wins){
+  if(boardState[a] && boardState[a] === boardState[b] && boardState[a] === boardState[c]){
+   return boardState[a];
+  }
+ }
+ return boardState.every(cell => cell) ? 'draw' : null;
+}
+function finishGame(result){
+ active = false;
+ if(result === 'X'){
+  tttResult.innerText = 'You win! The AI learned from that and will be sharper next round.';
+  aiSkill = Math.min(1, aiSkill + 0.1);
+  aiProgress++;
+ } else if(result === 'O'){
+  tttResult.innerText = 'AI wins! Its strategy is adapting fast.';
+  aiSkill = Math.min(1, aiSkill + 0.05);
+  aiProgress++;
+ } else {
+  tttResult.innerText = 'Draw. The AI is stabilizing and getting harder to beat.';
+  aiSkill = Math.min(1, aiSkill + 0.08);
+  aiProgress++;
+ }
+ tttLevel.innerText = `AI Level: ${aiProgress}`;
+ tttStatus.innerText = 'Game Over';
+ draw();
+}
+function chooseAIMove(){
+ const available = cells.map((v,i) => v ? null : i).filter(i => i !== null);
+ if(!available.length) return null;
+ const best = minimax(cells, true, 0);
+ if(Math.random() < aiSkill || best.move === null) return best.move;
+ const bonus = available.filter(i => i !== best.move);
+ return bonus.length ? bonus[Math.floor(Math.random()*bonus.length)] : best.move;
+}
+function minimax(boardState, isMaximizing, depth){
+ const winner = checkWinner(boardState);
+ if(winner === 'O') return {score: 10 - depth, move: null};
+ if(winner === 'X') return {score: depth - 10, move: null};
+ if(winner === 'draw') return {score: 0, move: null};
+ const available = boardState.map((v,i) => v ? null : i).filter(i => i !== null);
+ let best = {score: isMaximizing ? -Infinity : Infinity, move: null};
+ for(const index of available){
+  boardState[index] = isMaximizing ? 'O' : 'X';
+  const result = minimax(boardState, !isMaximizing, depth + 1);
+  boardState[index] = '';
+  result.move = index;
+  if(isMaximizing){
+   if(result.score > best.score){ best = result; }
+  } else {
+   if(result.score < best.score){ best = result; }
+  }
+ }
+ return best;
+}
+startTTT();
+
+// RPS
+const rpsPlayerScore = document.getElementById('rpsPlayerScore');
+const rpsCpuScore = document.getElementById('rpsCpuScore');
+const rpsTies = document.getElementById('rpsTies');
+const rpsResult = document.getElementById('rpsResult');
+let rpsScore = {you:0,cpu:0,ties:0};
+let rpsHistory = [];
+function playRPS(p){
+ const arr=['rock','paper','scissors'];
+ const counter = lastCounter(p);
+ const c = Math.random() < 0.65 ? counter : arr[Math.floor(Math.random()*3)];
+ rpsHistory.push(p);
+ if(rpsHistory.length > 6) rpsHistory.shift();
+ let res = '';
+ if(p===c) res='Draw';
+ else if((p==='rock'&&c==='scissors')||(p==='paper'&&c==='rock')||(p==='scissors'&&c==='paper')) res='You Win';
+ else res='You Lose';
+ if(res==='You Win') rpsScore.you++;
+ else if(res==='You Lose') rpsScore.cpu++;
+ else rpsScore.ties++;
+ updateRPS();
+ rpsResult.innerText = `You: ${p} | CPU: ${c} → ${res}`;
+}
+function lastCounter(choice){
+ const counterMap = {rock:'paper',paper:'scissors',scissors:'rock'};
+ if(rpsHistory.filter(x=>x===choice).length >= 2) return counterMap[choice];
+ return ['rock','paper','scissors'][Math.floor(Math.random()*3)];
+}
+function updateRPS(){
+ rpsPlayerScore.innerText = rpsScore.you;
+ rpsCpuScore.innerText = rpsScore.cpu;
+ rpsTies.innerText = rpsScore.ties;
+}
+function resetRPS(){
+ rpsScore = {you:0,cpu:0,ties:0};
+ rpsHistory = [];
+ updateRPS();
+ rpsResult.innerText = 'Score reset. Ready for a new streak.';
+}
+resetRPS();
+
+// Memory
+const memBoard = document.getElementById('memBoard');
+const memMatches = document.getElementById('memMatches');
+const memAttempts = document.getElementById('memAttempts');
+const memResult = document.getElementById('memResult');
+let memValues = [];
+let gameMemory = {first:null,flipping:false,matched:0,attempts:0};
+function buildMemory(level=8){
+ const letters = 'ABCDEFGHJKLMNPQRSTUVWXYZ'.split('').slice(0, level);
+ memValues = [...letters, ...letters].sort(() => Math.random() - 0.5);
+ gameMemory = {first:null,flipping:false,matched:0,attempts:0};
+ memMatches.innerText = '0';
+ memAttempts.innerText = '0';
+ memResult.innerText = '';
+ renderMem();
+}
+function renderMem(){
+ memBoard.innerHTML = '';
+ memValues.forEach((v,i)=>{
+  const card = document.createElement('div');
+  card.className = 'mem';
+  card.dataset.val = v;
+  card.dataset.index = i;
+  card.onclick = () => flip(card);
+  memBoard.appendChild(card);
+ });
+}
+function flip(card){
+ if(gameMemory.flipping || card.classList.contains('matched') || card.innerText) return;
+ card.innerText = card.dataset.val;
+ if(!gameMemory.first){
+  gameMemory.first = card;
+  return;
+ }
+ gameMemory.attempts++;
+ memAttempts.innerText = gameMemory.attempts;
+ if(gameMemory.first.dataset.val === card.dataset.val){
+  gameMemory.matched++;
+  card.classList.add('matched');
+  gameMemory.first.classList.add('matched');
+  gameMemory.first = null;
+  memMatches.innerText = gameMemory.matched;
+  if(gameMemory.matched === memValues.length / 2){
+   memResult.innerText = `Great job! You matched all pairs in ${gameMemory.attempts} attempts.`;
+  }
+ } else {
+  gameMemory.flipping = true;
+  setTimeout(() => {
+   gameMemory.first.innerText = '';
+   card.innerText = '';
+   gameMemory.first = null;
+   gameMemory.flipping = false;
+  }, 650);
+ }
+}
+function resetMemory(){
+ buildMemory(memValues.length / 2 || 8);
+}
+buildMemory(8);
+</script>
+</body>
+</html>
